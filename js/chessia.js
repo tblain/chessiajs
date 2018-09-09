@@ -3,44 +3,63 @@ var board,
 
 /*The "AI" part starts here */
 
+class myMove {
+    constructor(moveName) {
+        
+    }
+    // board;
+    // moves;
+    // moveName;
+
+}
+
 var calculateBoardScore = function(board) {
     var boardScore = 0;
-    
-    for (let i = 0; i < board.count; i++){
-        let position = board[i];
-        let positionScore = 0;
 
-        switch(position.type) {
-            case 'k':
-            positionScore = 900;
-            break;
+    for (let i = 0; i < board.length; i++){
+        let row = board[i];
+        // console.log("i: " + i)
 
-            case 'q':
-            positionScore = 90;
-            break;
+        for (let j = 0; j < row.length; j++) {
+            // console.log("   j: " + j)
+            let position = row[j];
+            let positionScore = 0;
+            if(position) {
+                // console.log(position.type)
+                switch(position.type) {
+                    case 'k': // king
+                    positionScore = 900;
+                    break;
 
-            case '50':
-            positionScore = 50;
-            break;
+                    case 'q': // queen
+                    positionScore = 90;
+                    break;
 
-            case 'b':
-            positionScore = 30;
-            break;
+                    case 'r': // rook
+                    positionScore = 50;
+                    break;
 
-            case 'n':
-            positionScore = 30;
-            break;
+                    case 'b': // bishop
+                    positionScore = 30;
+                    break;
 
-            case 'p':
-            positionScore = 10;
-            break;
+                    case 'n': // knight
+                    positionScore = 30;
+                    break;
+
+                    case 'p': // pawn
+                    positionScore = 10;
+                    break;
+                }
+
+                if(position.color == "w")
+                    positionScore = positionScore * -1;
+                // console.log(positionScore)
+                boardScore += positionScore;
+            }
         }
-
-        if(position.color == "w")
-            positionScore = positionScore * -1;
-
-        boardScore += positionScore;
     }
+
 
     return boardScore;
 }
@@ -48,21 +67,27 @@ var calculateBoardScore = function(board) {
 var calculateBestMove = function(game) {
 
     var newGameMoves = game.moves();
-    var board = game.board();
     var bestScore = -90000;
     var bestMove;
+    // console.log(newGameMoves)
 
-    for (var i = newGameMoves.length - 1; i >= 0; i--) {
+    for (var i = 0; i < newGameMoves.length; i++) {
         var move = newGameMoves[i];
         game.move(move);
-        moveScore = calculateBoardScore(board);
+        var board = game.board();
+        moveScore = calculateBoardScore(board); 
+        // console.log("   move : " + move + " | score : " + moveScore)
         if (moveScore > bestScore) {
             bestMove = move;
             bestScore = moveScore;
+            // console.log(game.ascii())
+            // console.log("best move : " + bestMove + " | score : " + bestScore)
         }
         game.undo();
     }
-
+    
+    // console.log(bestMove)
+    // console.log(game.moves())
     return bestMove;
 
 };
