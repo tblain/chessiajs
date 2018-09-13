@@ -1,17 +1,11 @@
 var board,
     game = new Chess();
-
+var lastMove;
 /*The "AI" part starts here */
 
-class myMove {
-    constructor(moveName) {
-        
-    }
-    // board;
-    // moves;
-    // moveName;
+var DEPTH = 2;
 
-}
+//----------------------------------------------------------------
 
 var calculateBoardScore = function(board) {
     var boardScore = 0;
@@ -60,37 +54,46 @@ var calculateBoardScore = function(board) {
         }
     }
 
-
     return boardScore;
 }
 
-var calculateBestMove = function(game) {
+//----------------------------------------------------------------
 
-    var newGameMoves = game.moves();
-    var bestScore = -90000;
-    var bestMove;
-    // console.log(newGameMoves)
-
-    for (var i = 0; i < newGameMoves.length; i++) {
-        var move = newGameMoves[i];
-        game.move(move);
-        var board = game.board();
-        moveScore = calculateBoardScore(board); 
-        // console.log("   move : " + move + " | score : " + moveScore)
-        if (moveScore > bestScore) {
-            bestMove = move;
-            bestScore = moveScore;
-            // console.log(game.ascii())
-            // console.log("best move : " + bestMove + " | score : " + bestScore)
-        }
-        game.undo();
+var minimax = function (depth, game, isMaximisingPlayer) {
+    if (depth === 0) {
+        return calculateBoardScore(game.board());
     }
-    
-    // console.log(bestMove)
-    // console.log(game.moves())
-    return bestMove;
-
+    var moves = game.moves();
+    if (isMaximisingPlayer) {
+        var bestMove = -9999;
+        for (var i = 0; i < moves.length; i++) {
+            game.move(moves[i]);
+            if(game.in_checkmate()) {
+                game.undo();
+                return 999999;
+            } else {
+                bestMove = Math.max(bestMove, minimax(depth - 1, game, !isMaximisingPlayer));
+            }
+            game.undo();
+        }
+        return bestMove;
+    } else {
+        var bestMove = 9999;
+        for (var i = 0; i < moves.length; i++) {
+            game.move(moves[i]);
+            if(game.in_checkmate()) {
+                game.undo();
+                return -999999;
+            } else {
+                bestMove = Math.min(bestMove, minimax(depth - 1, game, !isMaximisingPlayer));
+            }
+            game.undo();
+        }
+        return bestMove;
+    }
 };
+
+//----------------------------------------------------------------
 
 /* board visualization and games state handling starts here*/
 
@@ -103,8 +106,11 @@ var onDragStart = function (source, piece, position, orientation) {
 
 var makeBestMove = function () {
     console.log("makeBestMove")
-    var bestMove = getBestMove(game);
+    var bestMove = getBestMove(game)
+    console.log("mbm : " + bestMove)
+    // console.log(game.ascii());
     game.move(bestMove);
+    // console.log(game.ascii());
     board.position(game.fen());
     renderMoveHistory(game.history());
     if (game.game_over()) {
@@ -113,11 +119,21 @@ var makeBestMove = function () {
 };
 
 var getBestMove = function (game) {
-    console.log("getBestMove")
+    // console.log("getBestMove")
     if (game.game_over()) {
         alert('Game over');
     }
-    var bestMove = calculateBestMove(game);
+    let moves = game.moves();
+    var bestScore = -90000;
+    var bestMove;
+    for (var i = 0; i < moves.length; i++) {
+        var move = moves[i];
+        moveScore = minimax(DEPTH, game, true);;
+        if (moveScore > bestScore) {
+            bestMove = move;
+            bestScore = moveScore;
+        }
+    }
     return bestMove;
 };
 
@@ -132,16 +148,20 @@ var renderMoveHistory = function (moves) {
 };
 
 var onDrop = function (source, target) {
-    console.log("onDrop")
+    // console.log("onDrop")
     var move = game.move({
         from: source,
         to: target,
         promotion: 'q'
     });
-
+    // console.log(move.san)
     removeGreySquares();
     if (move === null) {
+        console.log("spanback")
         return 'snapback';
+    } else {
+        console.log("create lastMove")
+        // console.log(game.ascii())
     }
 
     renderMoveHistory(game.history());
