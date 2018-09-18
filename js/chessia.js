@@ -49,14 +49,19 @@ var calculateBoardScore = function(board, boardScore, move) {
                 }
             }
         }
-            // if(boardScore != 0){
-                // console.log("board score for : " + move)
-                // console.log("   boardScore : " + boardScore)
-            // }
+            if(boardScore > 10){
+                console.log("depth 0 => board score for : ")
+                console.log(move)
+                console.log("   boardScore : " + boardScore)
+                game.move(move);
+                console.log(game.ascii());
+                if(!move)
+                    game.undo();
+            }
         return boardScore;
     } else {
         // console.log("board score")
-        var oldBoardScore = boardScore;
+        // var oldBoardScore = boardScore;
     
         if(move.flags == "c") {
             let positionScore = 9;
@@ -106,9 +111,20 @@ var calculateBoardScore = function(board, boardScore, move) {
 
             boardScore += positionScore;
 
+            if(boardScore > 10){
+                console.log("board score for : ")
+                console.log(move)
+                console.log("   boardScore : " + boardScore)
+                game.move(move);
+                console.log(game.ascii());
+                if(!move)
+                    game.undo();
+            }
+
             // if(boardScore != 0){
-                // console.log("board score for : " + move)
-                // console.log("   boardScore : " + boardScore)
+            //     console.log("board score for : ")
+            //     console.log()
+            //     console.log("   boardScore : " + boardScore)
             // }
             // console.log("boardScore " + boardScore + " | position score : " + positionScore + " | " + move)
         }
@@ -132,17 +148,17 @@ var minimax = function (depth, game, isMaximisingPlayer, boardScore) {
     }
     var moves = game.moves({ verbose: true });
     // console.log(moves)
+    // console.log(moves)
     if (isMaximisingPlayer) {
         var bestScore = -9999;
         for (var i = 0; i < moves.length; i++) {
             game.move(moves[i]);
             // console.log(moves[i])
             if(game.in_checkmate()) {
-                game.undo();
-                return 999999;
+                bestScore = 999999;
             } else {
-                boardScore = calculateBoardScore(game.board(), boardScore, moves[i]);
-                bestScore = Math.max(bestScore, minimax(depth - 1, game, !isMaximisingPlayer, boardScore));
+                bs = calculateBoardScore(game.board(), boardScore, moves[i]);
+                bestScore = Math.max(bestScore, minimax(depth - 1, game, !isMaximisingPlayer, bs));
             }
             game.undo();
         }
@@ -152,11 +168,10 @@ var minimax = function (depth, game, isMaximisingPlayer, boardScore) {
         for (var i = 0; i < moves.length; i++) {
             game.move(moves[i]);
             if(game.in_checkmate()) {
-                game.undo();
-                return -999999;
+                bestScore = -999999;
             } else {
-                boardScore = calculateBoardScore(game.board(), boardScore, moves[i]);
-                bestScore = Math.min(bestScore, minimax(depth - 1, game, !isMaximisingPlayer, boardScore));
+                bs = calculateBoardScore(game.board(), boardScore, moves[i]);
+                bestScore = Math.min(bestScore, minimax(depth - 1, game, !isMaximisingPlayer, bs));
             }
             game.undo();
         }
@@ -208,15 +223,17 @@ var getBestMove = function (game) {
     for (var i = 0; i < moves.length; i++) {
         var move = moves[i];
 
-        boardScore = calculateBoardScore(game.board(), boardScore, moves[i]);
-        moveScore = minimax(depth-1, game, true, boardScore);
+        bs = calculateBoardScore(game.board(), boardScore, moves[i]);
+        moveScore = minimax(depth-1, game, true, bs);
         if (moveScore >= bestScore) {
             bestMove = move;
             bestScore = moveScore;
             // console.log("--------------------")
             
             console.log("   NEW bestScore " + bestScore + " | bestMove " + bestMove)
+            game.move(move)
             // console.log(game.ascii())
+            game.undo()
         }
     }
 
@@ -226,7 +243,7 @@ var getBestMove = function (game) {
 
     var d2 = new Date().getTime();
     var moveTime = (d2 - d);
-    var positionsPerS = ( positionCount * 1000 / moveTime);
+    var positionsPerS = ( positionCount * 1000 / moveTime );
 
     $('#position-count').text(positionCount);
     $('#time').text(moveTime/1000 + 's');
