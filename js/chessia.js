@@ -3,93 +3,164 @@ var board,
 var lastMove;
 /*The "AI" part starts here */
 
-var DEPTH = 2;
-
 //----------------------------------------------------------------
 
-var calculateBoardScore = function(board) {
-    var boardScore = 0;
+var calculateBoardScore = function(board, boardScore, move) {
+    
+    if(!boardScore) {
+        var boardScore = 0;
 
-    for (let i = 0; i < board.length; i++){
-        let row = board[i];
-        // console.log("i: " + i)
+        for (let i = 0; i < 8; i++){
+            for (let j = 0; j < 8; j++) {
+                let position = board[i][j];
+                let positionScore = 0;
+                if(position) {
+                    // console.log(position.type)
+                    switch(position.type) {
+                        case 'k': // king
+                        positionScore = 900;
+                        break;
 
-        for (let j = 0; j < row.length; j++) {
-            // console.log("   j: " + j)
-            let position = row[j];
-            let positionScore = 0;
-            if(position) {
-                // console.log(position.type)
-                switch(position.type) {
-                    case 'k': // king
-                    positionScore = 900;
-                    break;
+                        case 'q': // queen
+                        positionScore = 90;
+                        break;
 
-                    case 'q': // queen
-                    positionScore = 90;
-                    break;
+                        case 'r': // rook
+                        positionScore = 50;
+                        break;
 
-                    case 'r': // rook
-                    positionScore = 50;
-                    break;
+                        case 'b': // bishop
+                        positionScore = 30;
+                        break;
 
-                    case 'b': // bishop
-                    positionScore = 30;
-                    break;
+                        case 'n': // knight
+                        positionScore = 30;
+                        break;
 
-                    case 'n': // knight
-                    positionScore = 30;
-                    break;
+                        case 'p': // pawn
+                        positionScore = 10;
+                        break;
+                    }
 
-                    case 'p': // pawn
-                    positionScore = 10;
-                    break;
+                    if(position.color == "w")
+                        positionScore = positionScore * -1;
+                    // console.log(positionScore)
+                    boardScore += positionScore;
                 }
-
-                if(position.color == "w")
-                    positionScore = positionScore * -1;
-                // console.log(positionScore)
-                boardScore += positionScore;
             }
         }
-    }
+            // if(boardScore != 0){
+                // console.log("board score for : " + move)
+                // console.log("   boardScore : " + boardScore)
+            // }
+        return boardScore;
+    } else {
+        // console.log("board score")
+        var oldBoardScore = boardScore;
+    
+        if(move.flags == "c") {
+            let positionScore = 9;
+            if(game.turn() == "w")
+                positionScore = positionScore * -1;
+            boardScore += positionScore;         
+        }
+            // console.log("checkCheck" + checkCheck)
 
-    return boardScore;
+            // console.log(change)
+        // console.log(move);
+        let positionScore = 0;
+        removedPiece = move.captured;
+        // console.log("   removedPiece : " + removedPiece)
+        if(removedPiece) {
+            switch(removedPiece) {
+                case "k": // king
+                positionScore = 900;
+                break;
+
+                case "q": // queen
+                positionScore = 90;
+                break;
+
+                case "r": // rook
+                positionScore = 50;
+                console.log("a rook can be killed!!")
+                break;
+
+                case "b": // bishop
+                positionScore = 30;
+                break;
+
+                case "n": // knight
+                positionScore = 30;
+                break;
+
+                case "n": // pawn
+                positionScore = 10;
+                break;
+            }
+
+            if(game.turn() == 'w'){
+                // console.log(game.turn())
+                positionScore = positionScore * -1;
+            }
+
+            boardScore += positionScore;
+
+            // if(boardScore != 0){
+                // console.log("board score for : " + move)
+                // console.log("   boardScore : " + boardScore)
+            // }
+            // console.log("boardScore " + boardScore + " | position score : " + positionScore + " | " + move)
+        }
+        // if(boardScore - oldBoardScore > 0) {
+        //     console.log("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+        //     console.log("       move : " + move + " | score difference : " + (boardScore - oldBoardScore))
+        //     console.log("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+        // }
+        return boardScore;
+    }
 }
 
 //----------------------------------------------------------------
 
-var minimax = function (depth, game, isMaximisingPlayer) {
+var minimax = function (depth, game, isMaximisingPlayer, boardScore) {
+    // console.log("======================")
+    // console.log("depth " + depth)
+    positionCount++;
     if (depth === 0) {
-        return calculateBoardScore(game.board());
+        return boardScore;
     }
-    var moves = game.moves();
+    var moves = game.moves({ verbose: true });
+    // console.log(moves)
     if (isMaximisingPlayer) {
-        var bestMove = -9999;
+        var bestScore = -9999;
         for (var i = 0; i < moves.length; i++) {
             game.move(moves[i]);
+            // console.log(moves[i])
             if(game.in_checkmate()) {
                 game.undo();
                 return 999999;
             } else {
-                bestMove = Math.max(bestMove, minimax(depth - 1, game, !isMaximisingPlayer));
+                boardScore = calculateBoardScore(game.board(), boardScore, moves[i]);
+                bestScore = Math.max(bestScore, minimax(depth - 1, game, !isMaximisingPlayer, boardScore));
             }
             game.undo();
         }
-        return bestMove;
+        return bestScore;
     } else {
-        var bestMove = 9999;
+        var bestScore = 9999;
         for (var i = 0; i < moves.length; i++) {
             game.move(moves[i]);
             if(game.in_checkmate()) {
                 game.undo();
                 return -999999;
             } else {
-                bestMove = Math.min(bestMove, minimax(depth - 1, game, !isMaximisingPlayer));
+                boardScore = calculateBoardScore(game.board(), boardScore, moves[i]);
+                bestScore = Math.min(bestScore, minimax(depth - 1, game, !isMaximisingPlayer, boardScore));
             }
             game.undo();
         }
-        return bestMove;
+        return bestScore;
     }
 };
 
@@ -105,9 +176,10 @@ var onDragStart = function (source, piece, position, orientation) {
 };
 
 var makeBestMove = function () {
-    console.log("makeBestMove")
+    // console.log("makeBestMove")
+    console.log("------------------------------")
     var bestMove = getBestMove(game)
-    console.log("mbm : " + bestMove)
+    // console.log("mbm : " + bestMove)
     // console.log(game.ascii());
     game.move(bestMove);
     // console.log(game.ascii());
@@ -123,17 +195,45 @@ var getBestMove = function (game) {
     if (game.game_over()) {
         alert('Game over');
     }
+    positionCount = 0;
+    var depth = parseInt($('#search-depth').find(':selected').text());
+    var d = new Date().getTime();
+
     let moves = game.moves();
     var bestScore = -90000;
     var bestMove;
+    
+    var boardScore = calculateBoardScore(game.board(), null, moves[i])
+    
     for (var i = 0; i < moves.length; i++) {
         var move = moves[i];
-        moveScore = minimax(DEPTH, game, true);;
-        if (moveScore > bestScore) {
+
+        boardScore = calculateBoardScore(game.board(), boardScore, moves[i]);
+        moveScore = minimax(depth-1, game, true, boardScore);
+        if (moveScore >= bestScore) {
             bestMove = move;
             bestScore = moveScore;
+            // console.log("--------------------")
+            
+            console.log("   NEW bestScore " + bestScore + " | bestMove " + bestMove)
+            // console.log(game.ascii())
         }
     }
+
+    console.log("           bestScore " + bestScore + " | bestMove " + bestMove)
+
+
+
+    var d2 = new Date().getTime();
+    var moveTime = (d2 - d);
+    var positionsPerS = ( positionCount * 1000 / moveTime);
+
+    $('#position-count').text(positionCount);
+    $('#time').text(moveTime/1000 + 's');
+    $('#positions-per-s').text(positionsPerS);
+    $('#evalScore').text(bestScore);
+
+
     return bestMove;
 };
 
@@ -156,13 +256,8 @@ var onDrop = function (source, target) {
     });
     // console.log(move.san)
     removeGreySquares();
-    if (move === null) {
-        console.log("spanback")
+    if (move === null)
         return 'snapback';
-    } else {
-        console.log("create lastMove")
-        // console.log(game.ascii())
-    }
 
     renderMoveHistory(game.history());
     window.setTimeout(makeBestMove, 250);
@@ -217,3 +312,11 @@ var cfg = {
 };
 
 board = ChessBoard('board', cfg);
+
+var buttonUndo = function() {
+    game.undo();
+    game.undo();
+    board.position(game.fen());
+    renderMoveHistory(game.history());
+    console.log("dunsdfosfdslkfndsmlfl")
+}
