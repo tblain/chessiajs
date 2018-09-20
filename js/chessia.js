@@ -8,6 +8,7 @@ var lastMove;
 var calculateBoardScore = function(board, boardScore, move) {
     
     if(!boardScore) {
+        let oldBoardScore = boardScore;
         var boardScore = 0;
 
         for (let i = 0; i < 8; i++){
@@ -49,14 +50,14 @@ var calculateBoardScore = function(board, boardScore, move) {
                 }
             }
         }
-            if(boardScore > 10){
-                console.log("depth 0 => board score for : ")
+            if(boardScore >= 10){
+                console.log("board score for : ")
                 console.log(move)
-                console.log("   boardScore : " + boardScore)
-                game.move(move);
+                console.log("   boardScore : " + boardScore + " | oldBoardScore: " + oldBoardScore)
+                // game.move(move);
                 console.log(game.ascii());
-                if(!move)
-                    game.undo();
+                // if(!move)
+                //     game.undo();
             }
         return boardScore;
     } else {
@@ -111,14 +112,16 @@ var calculateBoardScore = function(board, boardScore, move) {
 
             boardScore += positionScore;
 
-            if(boardScore > 10){
-                console.log("board score for : ")
+            if(boardScore >= 10){
+                console.log("================")
+                console.log("depth 0 : board score for : ")
                 console.log(move)
+                console.log("tour de " + game.turn())
                 console.log("   boardScore : " + boardScore)
-                game.move(move);
+                // game.move(move);
                 console.log(game.ascii());
-                if(!move)
-                    game.undo();
+                // if(!move)
+                //     game.undo();
             }
 
             // if(boardScore != 0){
@@ -153,9 +156,13 @@ var minimax = function (depth, game, isMaximisingPlayer, boardScore) {
         var bestScore = -9999;
         for (var i = 0; i < moves.length; i++) {
             game.move(moves[i]);
+            // console.log("moves depth " + depth + " | turn: " + game.turn())
+            // console.log(game.ascii())
+            // console.log(moves)
             // console.log(moves[i])
             if(game.in_checkmate()) {
-                bestScore = 999999;
+                game.undo();
+                return 999999;
             } else {
                 bs = calculateBoardScore(game.board(), boardScore, moves[i]);
                 bestScore = Math.max(bestScore, minimax(depth - 1, game, !isMaximisingPlayer, bs));
@@ -167,8 +174,12 @@ var minimax = function (depth, game, isMaximisingPlayer, boardScore) {
         var bestScore = 9999;
         for (var i = 0; i < moves.length; i++) {
             game.move(moves[i]);
+            // console.log("moves depth " + depth + " | turn: " + game.turn())
+            // console.log(game.ascii())
+            // console.log(moves)
             if(game.in_checkmate()) {
-                bestScore = -999999;
+                game.undo();
+                return -999999;
             } else {
                 bs = calculateBoardScore(game.board(), boardScore, moves[i]);
                 bestScore = Math.min(bestScore, minimax(depth - 1, game, !isMaximisingPlayer, bs));
@@ -193,6 +204,9 @@ var onDragStart = function (source, piece, position, orientation) {
 var makeBestMove = function () {
     // console.log("makeBestMove")
     console.log("------------------------------")
+    console.log("------------------------------")
+    console.log("------------------------------")
+    console.log("------------------------------")
     var bestMove = getBestMove(game)
     // console.log("mbm : " + bestMove)
     // console.log(game.ascii());
@@ -215,26 +229,36 @@ var getBestMove = function (game) {
     var d = new Date().getTime();
 
     let moves = game.moves();
+    console.log(moves)
     var bestScore = -90000;
     var bestMove;
     
-    var boardScore = calculateBoardScore(game.board(), null, moves[i])
+    var boardScore = calculateBoardScore(game.board(), null, null)
     
     for (var i = 0; i < moves.length; i++) {
         var move = moves[i];
+        console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        console.log("   minmax pour " + move)
 
-        bs = calculateBoardScore(game.board(), boardScore, moves[i]);
+        // console.log("avant move")
+        // console.log(game.ascii())
+        game.move(move);
+        // console.log("après move")
+        // console.log(game.ascii())
+        bs = calculateBoardScore(game.board(), boardScore, move);
+
         moveScore = minimax(depth-1, game, true, bs);
-        if (moveScore >= bestScore) {
+        if (moveScore > bestScore) {
             bestMove = move;
             bestScore = moveScore;
             // console.log("--------------------")
             
             console.log("   NEW bestScore " + bestScore + " | bestMove " + bestMove)
-            game.move(move)
+            // game.move(move)
             // console.log(game.ascii())
-            game.undo()
+            // game.undo()
         }
+        game.undo()
     }
 
     console.log("           bestScore " + bestScore + " | bestMove " + bestMove)
