@@ -5,9 +5,53 @@ var lastMove;
 
 //----------------------------------------------------------------
 
+var whitePawnTable = [[100,100,100,100,100,100, 100,100],
+                      [50, 50, 50, 50, 50, 50, 50, 50],
+                      [10, 10, 20, 30, 30, 20, 10, 10],
+                      [ 5,  5, 10, 27, 27, 10,  5,  5],
+                      [ 0,  0,  0, 25, 25,  0,  0,  0],
+                      [ 5, -5,-10,  0,  0,-10, -5,  5],
+                      [ 5, 10, 10,-25,-25, 10, 10,  5],
+                      [ 0,  0,  0,  0,  0,  0,  0,  0]];
+
+var blackPawnTable = [[ 0,  0,  0,  0,  0,  0,  0,  0],
+                      [ 5, 10, 10,-25,-25, 10, 10,  5],
+                      [ 5,  5, 10, 27, 27, 10,  5,  5],
+                      [ 5, -5,-10,  0,  0,-10, -5,  5],
+                      [ 0,  0,  0, 25, 25,  0,  0,  0],
+                      [10, 10, 20, 30, 30, 20, 10, 10],
+                      [50, 50, 50, 50, 50, 50, 50, 50],
+                      [100,100,100,100,100,100, 100,100]];
+
+                  // a   b     c    d    e     f    g     h
+var bishopTable = [[ 0 , 0  , -10 , 0  , 0  , -10 , 0   , 0 ], // 8
+
+                   [ 0 , 0  , 0   , 10 , 10 , 0   , 0   , 0 ], // 7
+
+                   [ 0 , 0  , 10  , 15 , 15 , 10  , 0   , 0 ], // 6
+
+                   [ 0 , 10 , 15  , 20 , 20 , 15  , 10  , 0 ], // 5
+
+                   [ 0 , 10 , 15  , 20 , 20 , 15  , 10  , 0 ], // 4
+
+                   [ 0 , 0  , 10  , 15 , 15 , 10  , 0   , 0 ], // 3
+
+                   [ 0 , 0  , 0   , 10 , 10 , 0   , 0   , 0 ], // 2
+
+                   [ 0 , 0  , 0   , 0  , 0  , 0   , 0   , 0]]; // 1
+
+var knightTable = [[-200, -100, -50, -50, -50, -50, -100, -200],
+                   [-100,    0,   0,   0,   0,   0,   0,  -100],
+                   [ -50,    0,  60,  60,  60,  60,   0,   -50],
+                   [ -50,    0,  30,  60,  60,  30,   0,   -50],
+                   [ -50,    0,  30,  60,  60,  30,   0,   -50],
+                   [ -50,    0,  30,  30,  30,  30,   0,   -50],
+                   [-100,    0,   0,   0,   0,   0,   0,  -100],
+                   [-200,  -50, -25, -25, -25, -25, -50,  -200]];
+
 var calculateBoardScore = function(board, boardScore, move) {
 
-    if(!boardScore) {
+    if(true && !boardScore) {
         // let oldBoardScore = boardScore;
         var boardScore = 0;
 
@@ -19,37 +63,53 @@ var calculateBoardScore = function(board, boardScore, move) {
                     // console.log(position.type)
                     switch(position.type) {
                         case 'k': // king
-                        positionScore = 900;
+                        positionScore = 50000;
                         break;
 
                         case 'q': // queen
-                        positionScore = 90;
+                        positionScore = 1000;
                         break;
 
                         case 'r': // rook
-                        positionScore = 50;
+                        positionScore = 550;
                         break;
 
                         case 'b': // bishop
-                        positionScore = 30;
+                        positionScore = 325 + bishopTable[i][j];
                         break;
 
                         case 'n': // knight
-                        positionScore = 30;
+                        positionScore = 325 + knightTable[i][j];
                         break;
 
                         case 'p': // pawn
-                        positionScore = 10;
+                        positionScore = 100;
+                        if(game.turn() == "w")
+                          positionScore += whitePawnTable[i][j];
+                        else {
+                          positionScore += blackPawnTable[i][j];
+                        }
                         break;
                     }
 
-                    if(position.color == "w")
-                        positionScore = positionScore * -1;
+                    if(position.color == "w"){
+                      positionScore = positionScore * -1;
+                    }
+
                     // console.log(positionScore)
                     boardScore += positionScore;
                 }
             }
         }
+
+        if(game.in_check()) {
+          if(game.turn() == "w")
+            boardScore += 9;
+          else {
+            boardScore -= 9;
+          }
+        }
+
             if(false && (boardScore >= 10 || boardScore <= -10)){
                 console.log("board score for : ")
                 console.log(move)
@@ -59,6 +119,7 @@ var calculateBoardScore = function(board, boardScore, move) {
                 // if(!move)
                 //     game.undo();
             }
+            // console.log(boardScore);
         return boardScore;
     } else {
         // console.log("board score")
@@ -98,14 +159,14 @@ var calculateBoardScore = function(board, boardScore, move) {
                 break;
             }
 
+            if(game.in_check())
+              positionScore += 9;
+
             if(game.turn() == 'w'){
-                console.log("white take : " + removedPiece + "         " + -positionScore);
                 boardScore -= positionScore;
             } else {
-                console.log("black take : " + removedPiece + "         " + positionScore);
                 boardScore += positionScore;
             }
-
 
             if(false && (boardScore >= 10 || boardScore <= -10)){
                 console.log("================")
@@ -113,24 +174,9 @@ var calculateBoardScore = function(board, boardScore, move) {
                 console.log(move)
                 console.log("tour de " + game.turn())
                 console.log("   boardScore : " + boardScore)
-                // game.move(move);
                 console.log(game.ascii());
-                // if(!move)
-                //     game.undo();
             }
-
-            // if(boardScore != 0){
-            //     console.log("board score for : ")
-            //     console.log()
-            //     console.log("   boardScore : " + boardScore)
-            // }
-            // console.log("boardScore " + boardScore + " | position score : " + positionScore + " | " + move)
         }
-        // if(boardScore - oldBoardScore > 0) {
-        //     console.log("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
-        //     console.log("       move : " + move + " | score difference : " + (boardScore - oldBoardScore))
-        //     console.log("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
-        // }
         return boardScore;
     }
 }
@@ -146,14 +192,14 @@ var minimax = function (depth, game, isMaximisingPlayer) {
     var newGameMoves = game.moves();
 
     if (isMaximisingPlayer) {
-        var bestMove = -9999;
+        var bestScore = -9999;
         for (var i = 0; i < newGameMoves.length; i++) {
             game.move(newGameMoves[i]);
             if(game.in_checkmate()) {
                 game.undo();
                 return 999999;
             } else {
-                bestScore = Math.max(bestScore, minimax(depth - 1, game, false));
+                bestScore = Math.max(bestScore, minimax(depth - 1, game, !isMaximisingPlayer));
             }
             game.undo();
         }
@@ -166,16 +212,13 @@ var minimax = function (depth, game, isMaximisingPlayer) {
                 game.undo();
                 return -999999;
             } else {
-              bestScore = Math.min(bestScore, minimax(depth - 1, game, true));
+              bestScore = Math.min(bestScore, minimax(depth - 1, game, !isMaximisingPlayer));
             }
             game.undo();
         }
         return bestScore;
     }
 };
-
-
-
 
 //----------------------------------------------------------------
 
