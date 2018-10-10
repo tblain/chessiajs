@@ -24,36 +24,64 @@ var blackPawnTable = [[ 0,  0,  0,  0,  0,  0,  0,  0],
                       [100,100,100,100,100,100, 100,100]];
 
                   // a   b     c    d    e     f    g     h
-var bishopTable = [[ 0 , 0  , -10 , 0  , 0  , -10 , 0   , 0 ], // 8
+var whiteBishopTable = [[ 0 , 0  , -30 , 0  , 0  , -30 , 0   , 0 ], // 8
 
-                   [ 0 , 0  , 0   , 10 , 10 , 0   , 0   , 0 ], // 7
+                       [ 0 , 0  , 0   , 30 , 30 , 0   , 0   , 0 ], // 7
 
-                   [ 0 , 0  , 10  , 15 , 15 , 10  , 0   , 0 ], // 6
+                       [ 0 , 0  , 30  , 45 , 45 , 30  , 0   , 0 ], // 6
 
-                   [ 0 , 10 , 15  , 20 , 20 , 15  , 10  , 0 ], // 5
+                       [ 0 , 30 , 45  , 60 , 60 , 45  , 30  , 0 ], // 5
 
-                   [ 0 , 10 , 15  , 20 , 20 , 15  , 10  , 0 ], // 4
+                       [ 0 , 30 , 45  , 60 , 60 , 45  , 30  , 0 ], // 4
 
-                   [ 0 , 0  , 10  , 15 , 15 , 10  , 0   , 0 ], // 3
+                       [ 0 , 0  , 30  , 45 , 45 , 30  , 0   , 0 ], // 3
 
-                   [ 0 , 0  , 0   , 10 , 10 , 0   , 0   , 0 ], // 2
+                       [ 0 , 0  , 0   , 30 , 30 , 0   , 0   , 0 ], // 2
 
-                   [ 0 , 0  , 0   , 0  , 0  , 0   , 0   , 0]]; // 1
+                       [ 0 , 0  , 0   , 0  , 0  , 0   , 0   , 0]]; // 1
 
-var knightTable = [[-200, -100, -50, -50, -50, -50, -100, -200],
-                   [-100,    0,   0,   0,   0,   0,   0,  -100],
-                   [ -50,    0,  60,  60,  60,  60,   0,   -50],
-                   [ -50,    0,  30,  60,  60,  30,   0,   -50],
-                   [ -50,    0,  30,  60,  60,  30,   0,   -50],
-                   [ -50,    0,  30,  30,  30,  30,   0,   -50],
-                   [-100,    0,   0,   0,   0,   0,   0,  -100],
-                   [-200,  -50, -25, -25, -25, -25, -50,  -200]];
+                        // a   b     c    d    e     f    g     h
+ var blackBishopTable = [[ 0 , 0  , 0   , 0  , 0  , 0   , 0   , 0 ], // 8
+
+                         [ 0 , 0  , 0   , 30 , 30 , 0   , 0   , 0 ], // 7
+
+                         [ 0 , 0  , 30  , 45 , 45 , 30  , 0   , 0 ], // 6
+
+                         [ 0 , 30 , 45  , 60 , 60 , 45  , 30  , 0 ], // 5
+
+                         [ 0 , 30 , 45  , 60 , 60 , 45  , 30  , 0 ], // 4
+
+                         [ 0 , 0  , 30  , 45 , 45 , 30  , 0   , 0 ], // 3
+
+                         [ 0 , 0  , 0   , 30 , 30 , 0   , 0   , 0 ], // 2
+
+                         [ 0 , 0  , -30 , 0  , 0  , -30 , 0   , 0 ]];// 1
+
+
+var whiteKnightTable = [[-50,-40,-30,-30,-30,-30,-40,-50],
+                       [-40,-20,  0,  0,  0,  0,-20,-40],
+                       [-30,  0, 10, 15, 15, 10,  0,-30],
+                       [-30,  5, 15, 20, 20, 15,  5,-30],
+                       [-30,  0, 15, 20, 20, 15,  0,-30],
+                       [-30,  5, 10, 15, 15, 10,  5,-30],
+                       [-40,-20,  0,  5,  5,  0,-20,-40],
+                       [-50,-40,-20,-30,-30,-20,-40,-50]];
+
+var blackKnightTable = [[-50,-40,-20,-30,-30,-20,-40,-50],
+                        [-40,-20,  0,  5,  5,  0,-20,-40],
+                        [-30,  5, 10, 15, 15, 10,  5,-30],
+                        [-30,  0, 15, 20, 20, 15,  0,-30],
+                        [-30,  5, 15, 20, 20, 15,  5,-30],
+                        [-30,  0, 10, 15, 15, 10,  0,-30],
+                        [-40,-20,  0,  0,  0,  0,-20,-40],
+                        [-50,-40,-30,-30,-30,-30,-40,-50]];
 
 var calculateBoardScore = function(board, boardScore, move) {
 
     if(true && !boardScore) {
         // let oldBoardScore = boardScore;
         var boardScore = 0;
+        let turn = game.turn() == "w"; // true : white // false : black
 
         for (let i = 0; i < 8; i++){
             for (let j = 0; j < 8; j++) {
@@ -75,16 +103,26 @@ var calculateBoardScore = function(board, boardScore, move) {
                         break;
 
                         case 'b': // bishop
-                        positionScore = 325 + bishopTable[i][j];
+                        positionScore = 325;
+                        if(turn)
+                          positionScore += whiteBishopTable[i][j];
+                        else {
+                          positionScore += blackBishopTable[i][j];
+                        }
                         break;
 
                         case 'n': // knight
-                        positionScore = 325 + knightTable[i][j];
+                        positionScore = 325;
+                        if(turn)
+                          positionScore += whiteKnightTable[i][j];
+                        else {
+                          positionScore += blackKnightTable[i][j];
+                        }
                         break;
 
                         case 'p': // pawn
                         positionScore = 100;
-                        if(game.turn() == "w")
+                        if(turn)
                           positionScore += whitePawnTable[i][j];
                         else {
                           positionScore += blackPawnTable[i][j];
