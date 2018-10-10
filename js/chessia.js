@@ -5,133 +5,145 @@ var lastMove;
 
 //----------------------------------------------------------------
 
-var whitePawnTable = [[100,100,100,100,100,100, 100,100],
-                      [50, 50, 50, 50, 50, 50, 50, 50],
-                      [10, 10, 20, 30, 30, 20, 10, 10],
-                      [ 5,  5, 10, 27, 27, 10,  5,  5],
-                      [ 0,  0,  0, 25, 25,  0,  0,  0],
-                      [ 5, -5,-10,  0,  0,-10, -5,  5],
-                      [ 5, 10, 10,-25,-25, 10, 10,  5],
-                      [ 0,  0,  0,  0,  0,  0,  0,  0]];
+var whitePawnTable = [
+    [100, 100, 100, 100, 100, 100, 100, 100],
+    [50, 50, 50, 50, 50, 50, 50, 50],
+    [10, 10, 20, 30, 30, 20, 10, 10],
+    [5, 5, 10, 27, 27, 10, 5, 5],
+    [0, 0, 0, 25, 25, 0, 0, 0],
+    [5, -5, -10, 0, 0, -10, -5, 5],
+    [5, 10, 10, -25, -25, 10, 10, 5],
+    [0, 0, 0, 0, 0, 0, 0, 0]
+];
 
-var blackPawnTable = [[ 0,  0,  0,  0,  0,  0,  0,  0],
-                      [ 5, 10, 10,-25,-25, 10, 10,  5],
-                      [ 5,  5, 10, 27, 27, 10,  5,  5],
-                      [ 5, -5,-10,  0,  0,-10, -5,  5],
-                      [ 0,  0,  0, 25, 25,  0,  0,  0],
-                      [10, 10, 20, 30, 30, 20, 10, 10],
-                      [50, 50, 50, 50, 50, 50, 50, 50],
-                      [100,100,100,100,100,100, 100,100]];
+var blackPawnTable = [
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [5, 10, 10, -25, -25, 10, 10, 5],
+    [5, 5, 10, 27, 27, 10, 5, 5],
+    [5, -5, -10, 0, 0, -10, -5, 5],
+    [0, 0, 0, 25, 25, 0, 0, 0],
+    [10, 10, 20, 30, 30, 20, 10, 10],
+    [50, 50, 50, 50, 50, 50, 50, 50],
+    [100, 100, 100, 100, 100, 100, 100, 100]
+];
 
-                  // a   b     c    d    e     f    g     h
-var whiteBishopTable = [[ 0 , 0  , -30 , 0  , 0  , -30 , 0   , 0 ], // 8
+// a   b     c    d    e     f    g     h
+var whiteBishopTable = [
+    [0, 0, -30, 0, 0, -30, 0, 0], // 8
 
-                       [ 0 , 0  , 0   , 30 , 30 , 0   , 0   , 0 ], // 7
+    [0, 0, 0, 30, 30, 0, 0, 0], // 7
 
-                       [ 0 , 0  , 30  , 45 , 45 , 30  , 0   , 0 ], // 6
+    [0, 0, 30, 45, 45, 30, 0, 0], // 6
 
-                       [ 0 , 30 , 45  , 60 , 60 , 45  , 30  , 0 ], // 5
+    [0, 30, 45, 60, 60, 45, 30, 0], // 5
 
-                       [ 0 , 30 , 45  , 60 , 60 , 45  , 30  , 0 ], // 4
+    [0, 30, 45, 60, 60, 45, 30, 0], // 4
 
-                       [ 0 , 0  , 30  , 45 , 45 , 30  , 0   , 0 ], // 3
+    [0, 0, 30, 45, 45, 30, 0, 0], // 3
 
-                       [ 0 , 0  , 0   , 30 , 30 , 0   , 0   , 0 ], // 2
+    [0, 0, 0, 30, 30, 0, 0, 0], // 2
 
-                       [ 0 , 0  , 0   , 0  , 0  , 0   , 0   , 0]]; // 1
+    [0, 0, 0, 0, 0, 0, 0, 0]
+]; // 1
 
-                        // a   b     c    d    e     f    g     h
- var blackBishopTable = [[ 0 , 0  , 0   , 0  , 0  , 0   , 0   , 0 ], // 8
+// a   b     c    d    e     f    g     h
+var blackBishopTable = [
+    [0, 0, 0, 0, 0, 0, 0, 0], // 8
 
-                         [ 0 , 0  , 0   , 30 , 30 , 0   , 0   , 0 ], // 7
+    [0, 0, 0, 30, 30, 0, 0, 0], // 7
 
-                         [ 0 , 0  , 30  , 45 , 45 , 30  , 0   , 0 ], // 6
+    [0, 0, 30, 45, 45, 30, 0, 0], // 6
 
-                         [ 0 , 30 , 45  , 60 , 60 , 45  , 30  , 0 ], // 5
+    [0, 30, 45, 60, 60, 45, 30, 0], // 5
 
-                         [ 0 , 30 , 45  , 60 , 60 , 45  , 30  , 0 ], // 4
+    [0, 30, 45, 60, 60, 45, 30, 0], // 4
 
-                         [ 0 , 0  , 30  , 45 , 45 , 30  , 0   , 0 ], // 3
+    [0, 0, 30, 45, 45, 30, 0, 0], // 3
 
-                         [ 0 , 0  , 0   , 30 , 30 , 0   , 0   , 0 ], // 2
+    [0, 0, 0, 30, 30, 0, 0, 0], // 2
 
-                         [ 0 , 0  , -30 , 0  , 0  , -30 , 0   , 0 ]];// 1
+    [0, 0, -30, 0, 0, -30, 0, 0]
+]; // 1
 
 
-var whiteKnightTable = [[-50,-40,-30,-30,-30,-30,-40,-50],
-                       [-40,-20,  0,  0,  0,  0,-20,-40],
-                       [-30,  0, 10, 15, 15, 10,  0,-30],
-                       [-30,  5, 15, 20, 20, 15,  5,-30],
-                       [-30,  0, 15, 20, 20, 15,  0,-30],
-                       [-30,  5, 10, 15, 15, 10,  5,-30],
-                       [-40,-20,  0,  5,  5,  0,-20,-40],
-                       [-50,-40,-20,-30,-30,-20,-40,-50]];
+var whiteKnightTable = [
+    [-50, -40, -30, -30, -30, -30, -40, -50],
+    [-40, -20, 0, 0, 0, 0, -20, -40],
+    [-30, 0, 10, 15, 15, 10, 0, -30],
+    [-30, 5, 15, 20, 20, 15, 5, -30],
+    [-30, 0, 15, 20, 20, 15, 0, -30],
+    [-30, 5, 10, 15, 15, 10, 5, -30],
+    [-40, -20, 0, 5, 5, 0, -20, -40],
+    [-50, -40, -20, -30, -30, -20, -40, -50]
+];
 
-var blackKnightTable = [[-50,-40,-20,-30,-30,-20,-40,-50],
-                        [-40,-20,  0,  5,  5,  0,-20,-40],
-                        [-30,  5, 10, 15, 15, 10,  5,-30],
-                        [-30,  0, 15, 20, 20, 15,  0,-30],
-                        [-30,  5, 15, 20, 20, 15,  5,-30],
-                        [-30,  0, 10, 15, 15, 10,  0,-30],
-                        [-40,-20,  0,  0,  0,  0,-20,-40],
-                        [-50,-40,-30,-30,-30,-30,-40,-50]];
+var blackKnightTable = [
+    [-50, -40, -20, -30, -30, -20, -40, -50],
+    [-40, -20, 0, 5, 5, 0, -20, -40],
+    [-30, 5, 10, 15, 15, 10, 5, -30],
+    [-30, 0, 15, 20, 20, 15, 0, -30],
+    [-30, 5, 15, 20, 20, 15, 5, -30],
+    [-30, 0, 10, 15, 15, 10, 0, -30],
+    [-40, -20, 0, 0, 0, 0, -20, -40],
+    [-50, -40, -30, -30, -30, -30, -40, -50]
+];
 
-var calculateBoardScore = function(board, boardScore, move) {
+var calculateBoardScore = function (board, boardScore, move) {
 
-    if(true && !boardScore) {
+    if (true && !boardScore) {
         // let oldBoardScore = boardScore;
         var boardScore = 0;
         let turn = game.turn() == "w"; // true : white // false : black
 
-        for (let i = 0; i < 8; i++){
+        for (let i = 0; i < 8; i++) {
             for (let j = 0; j < 8; j++) {
                 let position = board[i][j];
                 let positionScore = 0;
-                if(position) {
+                if (position) {
                     // console.log(position.type)
-                    switch(position.type) {
-                        case 'k': // king
+                    switch (position.type) {
+                    case 'k': // king
                         positionScore = 50000;
                         break;
 
-                        case 'q': // queen
+                    case 'q': // queen
                         positionScore = 1000;
                         break;
 
-                        case 'r': // rook
+                    case 'r': // rook
                         positionScore = 550;
                         break;
 
-                        case 'b': // bishop
+                    case 'b': // bishop
                         positionScore = 325;
-                        if(turn)
-                          positionScore += whiteBishopTable[i][j];
+                        if (turn)
+                            positionScore += whiteBishopTable[i][j];
                         else {
-                          positionScore += blackBishopTable[i][j];
+                            positionScore += blackBishopTable[i][j];
                         }
                         break;
 
-                        case 'n': // knight
+                    case 'n': // knight
                         positionScore = 325;
-                        if(turn)
-                          positionScore += whiteKnightTable[i][j];
+                        if (turn)
+                            positionScore += whiteKnightTable[i][j];
                         else {
-                          positionScore += blackKnightTable[i][j];
+                            positionScore += blackKnightTable[i][j];
                         }
                         break;
 
-                        case 'p': // pawn
+                    case 'p': // pawn
                         positionScore = 100;
-                        if(turn)
-                          positionScore += whitePawnTable[i][j];
+                        if (turn)
+                            positionScore += whitePawnTable[i][j];
                         else {
-                          positionScore += blackPawnTable[i][j];
+                            positionScore += blackPawnTable[i][j];
                         }
                         break;
                     }
 
-                    if(position.color == "w"){
-                      positionScore = positionScore * -1;
+                    if (position.color == "w") {
+                        positionScore = positionScore * -1;
                     }
 
                     // console.log(positionScore)
@@ -140,73 +152,73 @@ var calculateBoardScore = function(board, boardScore, move) {
             }
         }
 
-        if(game.in_check()) {
-          if(game.turn() == "w")
-            boardScore += 9;
-          else {
-            boardScore -= 9;
-          }
+        if (game.in_check()) {
+            if (game.turn() == "w")
+                boardScore += 9;
+            else {
+                boardScore -= 9;
+            }
         }
 
-            if(false && (boardScore >= 10 || boardScore <= -10)){
-                console.log("board score for : ")
-                console.log(move)
-                console.log("   boardScore : " + boardScore + " | oldBoardScore: " + oldBoardScore)
-                // game.move(move);
-                console.log(game.ascii());
-                // if(!move)
-                //     game.undo();
-            }
-            // console.log(boardScore);
+        if (false && (boardScore >= 10 || boardScore <= -10)) {
+            console.log("board score for : ")
+            console.log(move)
+            console.log("   boardScore : " + boardScore + " | oldBoardScore: " + oldBoardScore)
+            // game.move(move);
+            console.log(game.ascii());
+            // if(!move)
+            //     game.undo();
+        }
+        // console.log(boardScore);
         return boardScore;
     } else {
         // console.log("board score")
         // var oldBoardScore = boardScore;
 
-                    // console.log("checkCheck" + checkCheck)
+        // console.log("checkCheck" + checkCheck)
 
-            // console.log(change)
+        // console.log(change)
         // console.log(move);
         // let positionScore = 0;
         removedPiece = move.captured;
         // console.log("   removedPiece : " + removedPiece)
-        if(removedPiece) {
-            switch(removedPiece) {
+        if (removedPiece) {
+            switch (removedPiece) {
                 // case "k": // king
                 // positionScore = 900;
                 // break;
 
-                case "q": // queen
+            case "q": // queen
                 positionScore = 90;
                 break;
 
-                case "r": // rook
+            case "r": // rook
                 positionScore = 50;
                 break;
 
-                case "b": // bishop
+            case "b": // bishop
                 positionScore = 30;
                 break;
 
-                case "n": // knight
+            case "n": // knight
                 positionScore = 30;
                 break;
 
-                case "p": // pawn
+            case "p": // pawn
                 positionScore = 10;
                 break;
             }
 
-            if(game.in_check())
-              positionScore += 9;
+            if (game.in_check())
+                positionScore += 9;
 
-            if(game.turn() == 'w'){
+            if (game.turn() == 'w') {
                 boardScore -= positionScore;
             } else {
                 boardScore += positionScore;
             }
 
-            if(false && (boardScore >= 10 || boardScore <= -10)){
+            if (false && (boardScore >= 10 || boardScore <= -10)) {
                 console.log("================")
                 console.log("depth 0 : board score for : ")
                 console.log(move)
@@ -224,47 +236,52 @@ var calculateBoardScore = function(board, boardScore, move) {
 var minimax = function (depth, game, isMaximisingPlayer, a, b) {
     positionCount++;
     if (depth === 0) {
-        return [null, calculateBoardScore(game.board())];
+        let score = calculateBoardScore(game.board());
+        return [score, score];
     }
 
     var newGameMoves = game.moves();
 
-    if (isMaximisingPlayer) {
+    if (isMaximisingPlayer) { // l'ia joue
+
         for (var i = 0; i < newGameMoves.length; i++) {
             game.move(newGameMoves[i]);
-            if(game.in_checkmate()) {
+            if (game.in_checkmate()) {
                 game.undo();
                 return [999999, b];
             } else {
+
                 let res = minimax(depth - 1, game, !isMaximisingPlayer, a, b);
 
                 a = Math.max(a, res[1]);
 
                 if (a >= b) {
-                  console.log("   pruning");
-                  game.undo();
-                  return [a, b];
+                    // console.log("   pruning");
+                    game.undo();
+                    return [a, b];
                 }
 
                 game.undo();
             }
         }
         return [a, b];
-    } else {
+
+    } else { // le joueur joue
+
         for (var i = 0; i < newGameMoves.length; i++) {
             game.move(newGameMoves[i]);
-            if(game.in_checkmate()) {
+            if (game.in_checkmate()) {
                 game.undo();
                 return [a, -999999];
             } else {
-              let res = minimax(depth - 1, game, !isMaximisingPlayer, a, b);
-              b = Math.min(b, res[0]);
+                let res = minimax(depth - 1, game, !isMaximisingPlayer, a, b);
+                b = Math.min(b, res[0]);
 
-              if(a >= b) {
-                console.log("   pruning");
-                game.undo();
-                return [a, b];
-              }
+                if (a >= b) {
+                    // console.log("   pruning");
+                    game.undo();
+                    return [a, b];
+                }
             }
             game.undo();
         }
@@ -304,19 +321,20 @@ var makeBestMove = function () {
 };
 
 var getBestMove = function (game) {
-    if(true){
-      if (game.game_over()) {
-        alert('Game over');
-      }
-      positionCount = 0;
-      var depth = parseInt($('#search-depth').find(':selected').text());
-      var d = new Date().getTime();
+    if (true) {
+        if (game.game_over()) {
+            alert('Game over');
+        }
+        positionCount = 0;
+        var depth = parseInt($('#search-depth').find(':selected').text());
+        var d = new Date().getTime();
     }
 
     let moves = game.moves();
     console.log(moves)
-    var bestScore = -900000;
     var bestMove;
+    var a = -99999
+    var b =  99999;
 
     for (var i = 0; i < moves.length; i++) {
         var move = moves[i];
@@ -325,28 +343,28 @@ var getBestMove = function (game) {
 
         game.move(move);
 
-        res = minimax(depth-1, game, false, -99999, 99999);
-        moveScore = res[0];
+        res = minimax(depth - 1, game, false, a, b);
+        moveScore = res[1];
         console.log("move score : " + moveScore);
 
-        if (moveScore > bestScore) {
+        if (moveScore > a) {
             bestMove = move;
-            bestScore = moveScore;
+            a = moveScore;
 
-            console.log("   NEW bestScore " + bestScore + " | bestMove " + bestMove)
+            console.log("   NEW bestScore " + a + " | bestMove " + bestMove)
         }
         game.undo()
     }
 
-    console.log("           bestScore " + bestScore + " | bestMove " + bestMove)
+    console.log("           bestScore " + a + " | bestMove " + bestMove)
 
 
 
     var d2 = new Date().getTime();
     var moveTime = (d2 - d);
-    var positionsPerS = ( positionCount * 1000 / moveTime );
+    var positionsPerS = (positionCount * 1000 / moveTime);
     $('#position-count').text(positionCount);
-    $('#time').text(moveTime/1000 + 's');
+    $('#time').text(moveTime / 1000 + 's');
     $('#positions-per-s').text(positionsPerS);
 
 
@@ -357,7 +375,7 @@ var renderMoveHistory = function (moves) {
     var historyElement = $('#move-history').empty();
     historyElement.empty();
     for (var i = 0; i < moves.length; i = i + 2) {
-        historyElement.append('<span>' + moves[i] + ' ' + ( moves[i + 1] ? moves[i + 1] : ' ') + '</span><br>')
+        historyElement.append('<span>' + moves[i] + ' ' + (moves[i + 1] ? moves[i + 1] : ' ') + '</span><br>')
     }
     historyElement.scrollTop(historyElement[0].scrollHeight);
 
@@ -385,7 +403,7 @@ var onSnapEnd = function () {
     board.position(game.fen());
 };
 
-var onMouseoverSquare = function(square, piece) {
+var onMouseoverSquare = function (square, piece) {
     var moves = game.moves({
         square: square,
         verbose: true
@@ -400,15 +418,15 @@ var onMouseoverSquare = function(square, piece) {
     }
 };
 
-var onMouseoutSquare = function(square, piece) {
+var onMouseoutSquare = function (square, piece) {
     removeGreySquares();
 };
 
-var removeGreySquares = function() {
+var removeGreySquares = function () {
     $('#board .square-55d63').css('background', '');
 };
 
-var greySquare = function(square) {
+var greySquare = function (square) {
     var squareEl = $('#board .square-' + square);
 
     var background = '#a9a9a9';
@@ -431,10 +449,10 @@ var cfg = {
 
 board = ChessBoard('board', cfg);
 
-var buttonUndo = function() {
+var buttonUndo = function () {
     game.undo();
     game.undo();
     board.position(game.fen());
     renderMoveHistory(game.history());
-    console.log("dunsdfosfdslkfndsmlfl")
+    // console.log("dunsdfosfdslkfndsmlfl")
 }
