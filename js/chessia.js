@@ -221,40 +221,54 @@ var calculateBoardScore = function(board, boardScore, move) {
 
 //----------------------------------------------------------------
 
-var minimax = function (depth, game, isMaximisingPlayer) {
+var minimax = function (depth, game, isMaximisingPlayer, a, b) {
     positionCount++;
     if (depth === 0) {
-        return calculateBoardScore(game.board());
+        return [null, calculateBoardScore(game.board())];
     }
 
     var newGameMoves = game.moves();
 
     if (isMaximisingPlayer) {
-        var bestScore = -9999;
         for (var i = 0; i < newGameMoves.length; i++) {
             game.move(newGameMoves[i]);
             if(game.in_checkmate()) {
                 game.undo();
-                return 999999;
+                return [999999, b];
             } else {
-                bestScore = Math.max(bestScore, minimax(depth - 1, game, !isMaximisingPlayer));
+                let res = minimax(depth - 1, game, !isMaximisingPlayer, a, b);
+
+                a = Math.max(a, res[1]);
+
+                if (a >= b) {
+                  console.log("   pruning");
+                  game.undo();
+                  return [a, b];
+                }
+
+                game.undo();
             }
-            game.undo();
         }
-        return bestScore;
+        return [a, b];
     } else {
-        var bestScore = 9999;
         for (var i = 0; i < newGameMoves.length; i++) {
             game.move(newGameMoves[i]);
             if(game.in_checkmate()) {
                 game.undo();
-                return -999999;
+                return [a, -999999];
             } else {
-              bestScore = Math.min(bestScore, minimax(depth - 1, game, !isMaximisingPlayer));
+              let res = minimax(depth - 1, game, !isMaximisingPlayer, a, b);
+              b = Math.min(b, res[0]);
+
+              if(a >= b) {
+                console.log("   pruning");
+                game.undo();
+                return [a, b];
+              }
             }
             game.undo();
         }
-        return bestScore;
+        return [a, b];
     }
 };
 
@@ -281,7 +295,7 @@ var makeBestMove = function () {
     game.move(bestMove);
     // console.log(game.ascii());
     board.position(game.fen());
-    var evalScore = calculateBoardScore(game.board(), null, null);
+    var evalScore = calculateBoardScore(game.board());
     $('#evalScore').text(evalScore);
     renderMoveHistory(game.history());
     if (game.game_over()) {
@@ -290,20 +304,19 @@ var makeBestMove = function () {
 };
 
 var getBestMove = function (game) {
-    // console.log("getBestMove")
-    if (game.game_over()) {
+    if(true){
+      if (game.game_over()) {
         alert('Game over');
+      }
+      positionCount = 0;
+      var depth = parseInt($('#search-depth').find(':selected').text());
+      var d = new Date().getTime();
     }
-    positionCount = 0;
-    var depth = parseInt($('#search-depth').find(':selected').text());
-    var d = new Date().getTime();
 
     let moves = game.moves();
     console.log(moves)
-    var bestScore = -90000;
+    var bestScore = -900000;
     var bestMove;
-
-    // var boardScore = calculateBoardScore(game.board(), null, null)
 
     for (var i = 0; i < moves.length; i++) {
         var move = moves[i];
@@ -311,9 +324,9 @@ var getBestMove = function (game) {
         console.log("   minmax pour " + move)
 
         game.move(move);
-        // bs = calculateBoardScore(game.board(), null, move);
 
-        moveScore = minimax(depth-1, game, false);
+        res = minimax(depth-1, game, false, -99999, 99999);
+        moveScore = res[0];
         console.log("move score : " + moveScore);
 
         if (moveScore > bestScore) {
