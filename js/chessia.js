@@ -233,7 +233,44 @@ var calculateBoardScore = function (board, boardScore, move) {
 
 //----------------------------------------------------------------
 
-var minimax = function (depth, game, isMaximisingPlayer, a, b) {
+var minimax = function (depth, game, isMaximisingPlayer) {
+    positionCount++;
+    if (depth === 0) {
+        return calculateBoardScore(game.board());
+    }
+
+    var newGameMoves = game.moves();
+
+    if (isMaximisingPlayer) {
+        var bestScore = -9999;
+        for (var i = 0; i < newGameMoves.length; i++) {
+            game.move(newGameMoves[i]);
+            if(game.in_checkmate()) {
+                game.undo();
+                return 999999;
+            } else {
+                bestScore = Math.max(bestScore, minimax(depth - 1, game, !isMaximisingPlayer));
+            }
+            game.undo();
+        }
+        return bestScore;
+    } else {
+        var bestScore = 9999;
+        for (var i = 0; i < newGameMoves.length; i++) {
+            game.move(newGameMoves[i]);
+            if(game.in_checkmate()) {
+                game.undo();
+                return -999999;
+            } else {
+              bestScore = Math.min(bestScore, minimax(depth - 1, game, !isMaximisingPlayer));
+            }
+            game.undo();
+        }
+        return bestScore;
+    }
+};
+
+var alphaBeta = function (depth, game, isMaximisingPlayer, a, b) {
     positionCount++;
     if (depth === 0) {
         let score = calculateBoardScore(game.board());
@@ -248,10 +285,11 @@ var minimax = function (depth, game, isMaximisingPlayer, a, b) {
             game.move(newGameMoves[i]);
             if (game.in_checkmate()) {
                 game.undo();
-                return [999999, b];
+                break;
+                // return [999999, b];
             } else {
 
-                let res = minimax(depth - 1, game, !isMaximisingPlayer, a, b);
+                let res = alphaBeta(depth - 1, game, !isMaximisingPlayer, a, b);
 
                 a = Math.max(a, res[1]);
 
@@ -272,9 +310,10 @@ var minimax = function (depth, game, isMaximisingPlayer, a, b) {
             game.move(newGameMoves[i]);
             if (game.in_checkmate()) {
                 game.undo();
-                return [a, -999999];
+                break;
+                // return [a, -999999];
             } else {
-                let res = minimax(depth - 1, game, !isMaximisingPlayer, a, b);
+                let res = alphaBeta(depth - 1, game, !isMaximisingPlayer, a, b);
                 b = Math.min(b, res[0]);
 
                 if (a >= b) {
@@ -288,6 +327,42 @@ var minimax = function (depth, game, isMaximisingPlayer, a, b) {
         return [a, b];
     }
 };
+
+//----------------------------------------------------------------
+
+var swapElementsIn2Arrays = function(array1, array2, f, t) { // swap elem from the "f" pos to the "t" pos in the 2 arrays simultatenously
+    // array1
+    var tmp1 = array1[f];
+    array1[f] = array1[t];
+    array1[t] = tmp1;
+
+    // array2
+    var tmp2 = array2[f];
+    array2[f] = array2[t];
+    array2[t] = tmp2;
+}
+
+var killerMoves = function(game) {
+    let moves = game.moves();
+    let movesEval = [];
+
+    for (var i = 0; i < moves.length; i++) {
+        move = moves[i];
+        game.move(move);
+        movesEval[i] = minimax(1, game, true);
+        game.undo();
+    }
+    var len = moves.length;
+    for (var i = len-1; i>=0; i--){
+      for(var j = 1; j<=i; j++){
+        if(movesEval[j-1]<movesEval[j]){
+            swapElementsIn2Arrays(moves, movesEval, j-1, j);
+         }
+      }
+    }
+
+    return moves;
+}
 
 //----------------------------------------------------------------
 
@@ -330,7 +405,7 @@ var getBestMove = function (game) {
         var d = new Date().getTime();
     }
 
-    let moves = game.moves();
+    let moves = killerMoves(game);
     console.log(moves)
     var bestMove;
     var a = -99999
@@ -343,7 +418,7 @@ var getBestMove = function (game) {
 
         game.move(move);
 
-        res = minimax(depth - 1, game, false, a, b);
+        res = alphaBeta(depth - 1, game, false, a, b);
         moveScore = res[1];
         console.log("move score : " + moveScore);
 
