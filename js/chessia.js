@@ -17,13 +17,13 @@ var whitePawnTable = [
 ];
 
 var blackPawnTable = [
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [5, 10, 10, -25, -25, 10, 10, 5],
-    [5, 5, 10, 27, 27, 10, 5, 5],
-    [5, -5, -10, 0, 0, -10, -5, 5],
-    [0, 0, 0, 25, 25, 0, 0, 0],
-    [10, 10, 20, 30, 30, 20, 10, 10],
-    [50, 50, 50, 50, 50, 50, 50, 50],
+    [ 0,    0,   0,   0,   0,   0,   0,   0],
+    [ 5,   10,  10, -25, -25,  10,  10,   5],
+    [ 5,    5,  10,  27,  27,  10,   5,   5],
+    [ 5,   -5, -10,   0,   0, -10,  -5,   5],
+    [ 0,    0,   0,  25,  25,   0,   0,   0],
+    [ 10,  10,  20,  30,  30,  20,  10,  10],
+    [ 50,  50,  50,  50,  50,  50,  50,  50],
     [100, 100, 100, 100, 100, 100, 100, 100]
 ];
 
@@ -90,145 +90,66 @@ var blackKnightTable = [
 
 var calculateBoardScore = function (board, boardScore, move) {
 
-    if (true && !boardScore) {
-        // let oldBoardScore = boardScore;
-        var boardScore = 0;
-        let turn = game.turn() == "w"; // true : white // false : black
+    var boardScore = 0;
+    let turn = game.turn() == "w"; // true : white // false : black
 
-        for (let i = 0; i < 8; i++) {
-            for (let j = 0; j < 8; j++) {
-                let position = board[i][j];
-                let positionScore = 0;
-                if (position) {
-                    // console.log(position.type)
-                    switch (position.type) {
-                    case 'k': // king
-                        positionScore = 50000;
-                        break;
+    for (let i = 0; i < 8; i++) {
+        for (let j = 0; j < 8; j++) {
+            let position = board[i][j];
+            let positionScore = 0;
+            if (position) {
+                // console.log(position.type)
+                switch (position.type) {
+                case 'k': // king
+                    positionScore = 1;
+                    break;
 
-                    case 'q': // queen
-                        positionScore = 1000;
-                        break;
+                case 'q': // queen
+                    positionScore = 1000;
+                    break;
 
-                    case 'r': // rook
-                        positionScore = 550;
-                        break;
+                case 'r': // rook
+                    positionScore = 550;
+                    break;
 
-                    case 'b': // bishop
-                        positionScore = 325;
-                        if (turn)
-                            positionScore += whiteBishopTable[i][j];
-                        else {
-                            positionScore += blackBishopTable[i][j];
-                        }
-                        break;
-
-                    case 'n': // knight
-                        positionScore = 325;
-                        if (turn)
-                            positionScore += whiteKnightTable[i][j];
-                        else {
-                            positionScore += blackKnightTable[i][j];
-                        }
-                        break;
-
-                    case 'p': // pawn
-                        positionScore = 100;
-                        if (turn)
-                            positionScore += whitePawnTable[i][j];
-                        else {
-                            positionScore += blackPawnTable[i][j];
-                        }
-                        break;
+                case 'b': // bishop
+                    positionScore = 325;
+                    if (turn)
+                        positionScore += whiteBishopTable[i][j];
+                    else {
+                        positionScore += blackBishopTable[i][j];
                     }
+                    break;
 
-                    if (position.color == "w") {
-                        positionScore = positionScore * -1;
+                case 'n': // knight
+                    positionScore = 325;
+                    if (turn)
+                        positionScore += whiteKnightTable[i][j];
+                    else {
+                        positionScore += blackKnightTable[i][j];
                     }
+                    break;
 
-                    // console.log(positionScore)
-                    boardScore += positionScore;
+                case 'p': // pawn
+                    positionScore = 100;
+                    if (turn)
+                        positionScore += whitePawnTable[i][j];
+                    else {
+                        positionScore += blackPawnTable[i][j];
+                    }
+                    break;
                 }
-            }
-        }
 
-        if (game.in_check()) {
-            if (game.turn() == "w")
-                boardScore += 9;
-            else {
-                boardScore -= 9;
-            }
-        }
+                if (position.color == "w") {
+                    positionScore = positionScore * -1;
+                }
 
-        if (false && (boardScore >= 10 || boardScore <= -10)) {
-            console.log("board score for : ")
-            console.log(move)
-            console.log("   boardScore : " + boardScore + " | oldBoardScore: " + oldBoardScore)
-            // game.move(move);
-            console.log(game.ascii());
-            // if(!move)
-            //     game.undo();
-        }
-        // console.log(boardScore);
-        return boardScore;
-    } else {
-        // console.log("board score")
-        // var oldBoardScore = boardScore;
-
-        // console.log("checkCheck" + checkCheck)
-
-        // console.log(change)
-        // console.log(move);
-        // let positionScore = 0;
-        removedPiece = move.captured;
-        // console.log("   removedPiece : " + removedPiece)
-        if (removedPiece) {
-            switch (removedPiece) {
-                // case "k": // king
-                // positionScore = 900;
-                // break;
-
-            case "q": // queen
-                positionScore = 90;
-                break;
-
-            case "r": // rook
-                positionScore = 50;
-                break;
-
-            case "b": // bishop
-                positionScore = 30;
-                break;
-
-            case "n": // knight
-                positionScore = 30;
-                break;
-
-            case "p": // pawn
-                positionScore = 10;
-                break;
-            }
-
-            if (game.in_check())
-                positionScore += 9;
-
-            if (game.turn() == 'w') {
-                boardScore -= positionScore;
-            } else {
+                // console.log(positionScore)
                 boardScore += positionScore;
             }
-
-            if (false && (boardScore >= 10 || boardScore <= -10)) {
-                console.log("================")
-                console.log("depth 0 : board score for : ")
-                console.log(move)
-                console.log("tour de " + game.turn())
-                console.log("   boardScore : " + boardScore)
-                console.log(game.ascii());
-            }
         }
-        return boardScore;
     }
+    return boardScore;
 }
 
 //----------------------------------------------------------------
@@ -429,19 +350,23 @@ var getBestMove = function (game) {
             console.log("   NEW bestScore " + a + " | bestMove " + bestMove)
         }
         game.undo()
+
+        var d2 = new Date().getTime();
+        var moveTime = (d2 - d);
+        var positionsPerS = (positionCount * 1000 / moveTime);
+        $('#position-count').text(positionCount);
+        $('#time').text(moveTime / 1000 + 's');
+        $('#positions-per-s').text(positionsPerS);
     }
 
     console.log("           bestScore " + a + " | bestMove " + bestMove)
 
-
-
-    var d2 = new Date().getTime();
-    var moveTime = (d2 - d);
-    var positionsPerS = (positionCount * 1000 / moveTime);
-    $('#position-count').text(positionCount);
-    $('#time').text(moveTime / 1000 + 's');
-    $('#positions-per-s').text(positionsPerS);
-
+    // var d2 = new Date().getTime();
+    // var moveTime = (d2 - d);
+    // var positionsPerS = (positionCount * 1000 / moveTime);
+    // $('#position-count').text(positionCount);
+    // $('#time').text(moveTime / 1000 + 's');
+    // $('#positions-per-s').text(positionsPerS);
 
     return bestMove;
 };
